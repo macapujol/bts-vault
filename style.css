@@ -286,3 +286,14 @@ main{padding-top:6px;padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 :root{--wish:#ffc107}
 .wish-star{top:5px;left:7px;font-size:25px;color:#ffc107;text-shadow:0 0 2px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.35)}
 .row-star{font-size:19px;line-height:1;color:#ffc107;text-shadow:0 0 1px rgba(0,0,0,.45);vertical-align:-2px}
+
+/* ═══ Filas de navegación con flechas ═══ */
+.navwrap{position:relative;background:var(--surface)}
+.navwrap .mnav{flex:1;min-width:0;width:100%}
+.navarrow{position:absolute;top:0;bottom:0;z-index:5;width:46px;border:none;color:var(--ink);font-size:24px;line-height:1;display:flex;align-items:center;padding:0 4px 3px}
+.navarrow.l{left:var(--gutter);justify-content:flex-start;background:linear-gradient(90deg,var(--surface) 55%,transparent)}
+.navarrow.r{right:var(--gutter);justify-content:flex-end;background:linear-gradient(270deg,var(--surface) 55%,transparent)}
+.navarrow:hover{color:var(--accent2)}
+@media(hover:none){.navarrow{display:none}}
+#enav button.on{color:#fff}
+[data-theme="dark"] #enav button.on{color:#111}

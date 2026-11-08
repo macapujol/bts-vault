@@ -131,10 +131,11 @@ function eraList() {
 function renderEnav() {
   const el = $("#enav"), left = el.scrollLeft, list = eraList();
   if (S.era !== "all" && !list.includes(S.era)) S.era = "all";
-  el.hidden = !list.length;
+  $("#enavwrap").hidden = !list.length;
   el.innerHTML = [["all", "Todas las eras"], ...list.map(e => [e, e])].map(([k, l]) =>
     `<button class="${S.era === k ? "on" : ""}" data-act="era" data-val="${esc(k)}">${esc(l)}</button>`).join("");
   el.scrollLeft = left;
+  updateArrows();
 }
 
 /* ═════════ Filtros y agrupación ═════════ */
@@ -288,6 +289,15 @@ function renderAll() { renderEnav(); renderChrome(); renderBanner(); renderFilte
 
 function buildMnav() {
   $("#mnav").innerHTML = MEMBERS.map(m => `<button data-act="member" data-val="${esc(m.key)}">${esc(m.label)}</button>`).join("");
+}
+function updateArrows() {
+  ["mnav", "enav"].forEach(id => {
+    const nav = document.getElementById(id), wrap = nav && nav.parentElement;
+    if (!wrap) return;
+    const l = wrap.querySelector(".navarrow.l"), r = wrap.querySelector(".navarrow.r");
+    l.hidden = !(nav.scrollLeft > 2);
+    r.hidden = !(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  });
 }
 function centerActiveMember(smooth, sel = "#mnav") {
   const nav = $(sel), b = nav.querySelector(".on");
@@ -675,6 +685,11 @@ function onAction(act, el, e) {
     case "setstate": closePop(); return patchItem(id, { estado: val });
     case "togglewish": closePop(); return patchItem(id, { deseos: !(byId(id) || {}).deseos });
     case "member": S.member = val; S.era = "all"; saveUI(); renderAll(); centerActiveMember(true); return $("#enav").scrollTo ? $("#enav").scrollTo({ left: 0 }) : undefined;
+    case "navscroll": {
+      const nav = document.getElementById(el.dataset.for), dx = Number(el.dataset.dir) * nav.clientWidth * 0.7;
+      if (nav.scrollBy) nav.scrollBy({ left: dx, behavior: "smooth" }); else nav.scrollLeft += dx;
+      return setTimeout(updateArrows, 350);
+    }
     case "era": S.era = val; saveUI(); renderAll(); return centerActiveMember(true, "#enav");
     case "view": S.view = val; saveUI(); renderChrome(); return renderList();
     case "new": return openNew();
@@ -742,7 +757,8 @@ function bindEvents() {
   document.addEventListener("error", e => { if (e.target && e.target.tagName === "IMG") e.target.style.display = "none"; }, true);
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closePop(); if (S.modal) closeModal(); } });
   window.addEventListener("scroll", closePop, { passive: true });
-  window.addEventListener("resize", closePop);
+  window.addEventListener("resize", () => { closePop(); updateArrows(); });
+  document.addEventListener("scroll", e => { if (e.target.classList && e.target.classList.contains("mnav")) updateArrows(); }, true);
   window.addEventListener("online", () => scheduleSync(300));
   document.addEventListener("visibilitychange", () => { if (!document.hidden) scheduleSync(300); });
   setInterval(() => { if (!document.hidden && !S.modal) scheduleSync(0); }, 90000);
@@ -757,7 +773,7 @@ function boot() {
   const ui = ls.get(LS.ui, {}) || {};
   S.view = ui.view === "list" ? "list" : "grid"; S.sortAsc = !!ui.sortAsc;
   S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all"; S.era = typeof ui.era === "string" ? ui.era : "all";
-  buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false); centerActiveMember(false, "#enav");
+  buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false); centerActiveMember(false, "#enav"); updateArrows();
   setStatus(cfgOk() ? "idle" : "off");
   if (cfgOk()) syncNow(); else if (!S.items.length) openSettings();
 }

@@ -40,8 +40,16 @@
   </div>
 </header>
 
-<nav id="mnav" class="mnav bar" aria-label="Integrantes"></nav>
-<nav id="enav" class="mnav bar" aria-label="Eras" hidden></nav>
+<div class="navwrap bar">
+  <button class="navarrow l" data-act="navscroll" data-dir="-1" data-for="mnav" aria-label="Anterior" hidden>‹</button>
+  <nav id="mnav" class="mnav" aria-label="Integrantes"></nav>
+  <button class="navarrow r" data-act="navscroll" data-dir="1" data-for="mnav" aria-label="Siguiente" hidden>›</button>
+</div>
+<div id="enavwrap" class="navwrap bar" hidden>
+  <button class="navarrow l" data-act="navscroll" data-dir="-1" data-for="enav" aria-label="Anterior" hidden>‹</button>
+  <nav id="enav" class="mnav" aria-label="Eras"></nav>
+  <button class="navarrow r" data-act="navscroll" data-dir="1" data-for="enav" aria-label="Siguiente" hidden>›</button>
+</div>
 <section id="banner" class="banner bar"></section>
 
 <section class="search bar">
