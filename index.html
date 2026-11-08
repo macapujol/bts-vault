@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BTS Merch Vault</title>
+<meta name="theme-color" content="#6d4fc2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Merch Vault">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  // Tema antes de pintar, para evitar el parpadeo blanco
+  try{
+    var t=localStorage.getItem("vault:theme");
+    if(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)t="dark";
+    document.documentElement.setAttribute("data-theme",t||"light");
+  }catch(e){}
+</script>
+</head>
+<body>
+
+<header class="topbar bar">
+  <div class="brand"><span class="logo">BTS</span><span class="name">Merch <b>Vault</b></span></div>
+  <div class="tools">
+    <button id="syncbtn" class="icon-btn" data-act="settings" data-state="off" title="Sincronización" aria-label="Sincronización">☁</button>
+    <button id="themebtn" class="icon-btn" data-act="theme" title="Modo oscuro" aria-label="Cambiar tema">☾</button>
+    <div class="seg" role="group" aria-label="Vista">
+      <button data-act="view" data-val="grid" aria-label="Cuadrícula">⊞</button>
+      <button data-act="view" data-val="list" aria-label="Lista">≡</button>
+    </div>
+    <button class="btn-primary" data-act="new">+ Nuevo</button>
+  </div>
+</header>
+
+<nav id="mnav" class="mnav bar" aria-label="Integrantes"></nav>
+<section id="banner" class="banner bar"></section>
+
+<section class="search bar">
+  <div class="search-row">
+    <input id="q" type="search" placeholder="Buscar nombre, edición, artista…" autocomplete="off" enterkeyhint="search">
+    <button id="filterbtn" class="chip-btn" data-act="filters">Filtros</button>
+  </div>
+  <div id="meta" class="meta"></div>
+</section>
+
+<section id="filters" class="filters bar" hidden></section>
+<div id="stats" class="stats bar"></div>
+
+<main id="list" class="bar"></main>
+
+<div id="pop" class="pop" hidden></div>
+<div id="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
