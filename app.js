@@ -13,8 +13,17 @@ const MEMBERS = [
 ];
 const CATS = ["Album", "Single", "LIVE SHOW", "MUSTER", "Video/Documental", "Media", "VARIETY SHOW", "MEMORIES", "SEASON'S GREETINGS", "SEASON PACKAGE"];
 const FMTS = ["CD", "BLU-RAY", "DVD", "Vinyl", "Cassette", "Digital Code", "NFC", "Photobook", "CD+DVD", "CD+BLU-RAY", "Set Book/DVD", "Otros"];
-const ORIGS = ["Corea", "Japón", "US/Global"];
-const COUNTRY = { "Corea": { c: "kr", t: "KR" }, "Japón": { c: "jp", t: "JP" }, "US/Global": { c: "gl", t: "GL" } };
+const ORIGS = ["Corea", "Japón", "US/Global", "Otro"];
+const FLAGS = (() => {
+  const us = (() => { let st = ""; for (let i = 0; i < 13; i += 2) st += `<rect y="${(i * 16 / 13).toFixed(2)}" width="24" height="${(16 / 13).toFixed(2)}" fill="#b22234"/>`;
+    let stars = ""; for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) stars += `<circle cx="${1.6 + c * 2.3}" cy="${1.5 + r * 2.4}" r=".5" fill="#fff"/>`;
+    return `<rect width="24" height="16" fill="#fff"/>${st}<rect width="10.5" height="8.6" fill="#3c3b6e"/>${stars}`; })();
+  const tri = a => `<g transform="rotate(${a} 12 8)"><path d="M9.6 2.1h4.8M9.6 3.3h4.8M9.6 4.5h4.8" stroke="#111" stroke-width=".55"/></g>`;
+  const kr = `<rect width="24" height="16" fill="#fff"/><path d="M8.8 8a3.2 3.2 0 0 1 6.4 0a1.6 1.6 0 0 1-3.2 0a1.6 1.6 0 0 0-3.2 0z" fill="#cd2e3a"/><path d="M8.8 8a3.2 3.2 0 0 0 6.4 0a1.6 1.6 0 0 0-3.2 0a1.6 1.6 0 0 1-3.2 0z" fill="#0047a0"/>${[-56.3, 56.3, 123.7, -123.7].map(tri).join("")}`;
+  const jp = `<rect width="24" height="16" fill="#fff"/><circle cx="12" cy="8" r="4.8" fill="#bc002d"/>`;
+  const other = `<rect width="24" height="16" fill="#e9e9ee"/><g fill="none" stroke="#7a7a8c" stroke-width=".9"><circle cx="12" cy="8" r="5.2"/><ellipse cx="12" cy="8" rx="2.3" ry="5.2"/><path d="M6.8 8h10.4"/></g>`;
+  return { "Corea": kr, "Japón": jp, "US/Global": us, "Otro": other };
+})();
 const STATES = [
   { key: "Lo tengo", label: "Lo tengo", short: "Lo tengo", cls: "have" },
   { key: "Comprado/En camino", label: "Comprado / en camino", short: "En camino", cls: "way" },
@@ -99,20 +108,40 @@ function serialize(d) {
 /* ═════════ Estado ═════════ */
 const S = {
   items: [], deleted: {}, rev: 0,
-  member: "all", view: "grid", sortAsc: false, filtersOpen: false,
+  member: "all", era: "all", view: "grid", sortAsc: false, filtersOpen: false,
   filters: { search: "", categoria: [], formato: [], origen: [], estado: "", deseos: false },
   modal: null, cfg: null, status: { state: "off", msg: "" },
 };
 const Sync = { busy: false, again: false, timer: null, last: 0 };
 const byId = id => S.items.find(i => i.id === id);
 const persistLocal = () => ls.set(LS.cache, { items: S.items, deleted: S.deleted });
-const saveUI = () => ls.set(LS.ui, { view: S.view, sortAsc: S.sortAsc, member: S.member });
+const saveUI = () => ls.set(LS.ui, { view: S.view, sortAsc: S.sortAsc, member: S.member, era: S.era });
 function touch() { S.rev++; persistLocal(); scheduleSync(); }
+
+/* ═════════ Eras ═════════ */
+function eraList() {
+  const first = new Map();
+  S.items.forEach(i => {
+    if (!i.era || (S.member !== "all" && i.artista !== S.member)) return;
+    const d = i.fecha || "9999";
+    if (!first.has(i.era) || d < first.get(i.era)) first.set(i.era, d);
+  });
+  return [...first.entries()].sort((a, b) => a[1].localeCompare(b[1]) || a[0].localeCompare(b[0])).map(e => e[0]);
+}
+function renderEnav() {
+  const el = $("#enav"), left = el.scrollLeft, list = eraList();
+  if (S.era !== "all" && !list.includes(S.era)) S.era = "all";
+  el.hidden = !list.length;
+  el.innerHTML = [["all", "Todas las eras"], ...list.map(e => [e, e])].map(([k, l]) =>
+    `<button class="${S.era === k ? "on" : ""}" data-act="era" data-val="${esc(k)}">${esc(l)}</button>`).join("");
+  el.scrollLeft = left;
+}
 
 /* ═════════ Filtros y agrupación ═════════ */
 function matchesBase(i) {
   const f = S.filters;
   if (S.member !== "all" && i.artista !== S.member) return false;
+  if (S.era !== "all" && i.era !== S.era) return false;
   const q = f.search.trim().toLowerCase();
   if (q && !(`${i.nombre} ${i.edicion} ${i.era} ${i.artista} ${i.categoria} ${i.formato}`.toLowerCase().includes(q))) return false;
   if (f.categoria.length && !f.categoria.includes(i.categoria)) return false;
@@ -159,14 +188,14 @@ function groupItems(items) {
 }
 
 /* ═════════ Render ═════════ */
-const flagHTML = o => { const k = COUNTRY[o]; return k ? `<span class="country c-${k.c}" title="${esc(o)}">${k.t}</span>` : ""; };
+const flagHTML = o => `<span class="country" title="${esc(o)}"><svg viewBox="0 0 24 16" aria-label="${esc(o)}">${FLAGS[o] || FLAGS["Otro"]}</svg></span>`;
 const imgHTML = it => (it.imagen ? `<img src="${esc(it.imagen)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : "");
 const nameHTML = it => `<strong>${esc(it.nombre)}</strong>${it.edicion ? ` <span class="ed">· ${esc(it.edicion)}</span>` : ""}`;
 
 function renderCard(it) {
   const s = stateOf(it.estado);
   return `<article class="card" data-act="edit" data-id="${esc(it.id)}">
-    <div class="cover"><span class="ph">♪</span>${imgHTML(it)}
+    <div class="cover">${imgHTML(it)}
       ${it.deseos ? `<span class="wish-star" title="En lista de deseos">★</span>` : ""}
       <button class="qs st-${s.cls}" data-act="pop" data-id="${esc(it.id)}" aria-label="Cambiar estado">${s.cls === "have" ? "✓" : s.cls === "way" ? "→" : "✗"}</button>
     </div>
@@ -181,8 +210,8 @@ function renderCard(it) {
 function renderRow(it) {
   const s = stateOf(it.estado);
   return `<div class="row" data-act="edit" data-id="${esc(it.id)}">
-    <div class="thumb"><span class="ph">♪</span>${imgHTML(it)}</div>
-    <div class="row-info"><div class="row-name">${nameHTML(it)}${it.deseos ? ` <span style="color:var(--wish)">★</span>` : ""}</div>
+    <div class="thumb">${imgHTML(it)}</div>
+    <div class="row-info"><div class="row-name">${nameHTML(it)}${it.deseos ? ` <span class="row-star">★</span>` : ""}</div>
       <div class="row-sub">${esc(it.artista)} · ${esc(it.categoria)} · ${esc(it.formato)}${it.fecha ? " · " + fmtDate(it.fecha) : ""}${flagHTML(it.origen)}</div></div>
     <button class="badge st-${s.cls}" data-act="pop" data-id="${esc(it.id)}">${s.short} ▾</button>
   </div>`;
@@ -213,12 +242,12 @@ function renderList() {
   host.innerHTML = groupItems(items).map(groupHTML).join("");
 }
 function renderBanner() {
-  const scope = S.items.filter(i => S.member === "all" || i.artista === S.member);
+  const scope = S.items.filter(i => (S.member === "all" || i.artista === S.member) && (S.era === "all" || i.era === S.era));
   const have = scope.filter(i => i.estado === "Lo tengo").length;
   const pct = scope.length ? Math.round(have / scope.length * 100) : 0;
   const m = MEMBERS.find(x => x.key === S.member);
-  $("#banner").innerHTML = `<div class="eyebrow">colección personal</div>
-    <h1>${S.member === "all" ? "Mi Colección BTS" : esc(m.label)}</h1>
+  $("#banner").innerHTML = `<div class="eyebrow">${S.era === "all" ? "colección personal" : S.member === "all" ? "Mi Colección BTS" : esc(m.label)}</div>
+    <h1>${S.era !== "all" ? esc(S.era) : S.member === "all" ? "Mi Colección BTS" : esc(m.label)}</h1>
     <div class="progress"><i style="width:${pct}%"></i></div>
     <div class="progress-label">${have} de ${scope.length} items · ${pct}% completado</div>`;
 }
@@ -239,7 +268,9 @@ function renderFilters() {
   if (!S.filtersOpen) return;
   const group = (title, key, list, label = v => v) => `<div class="fg"><h3>${title}</h3><div class="chips">${list.map(v =>
     `<button class="chip${S.filters[key].includes(v) ? " on" : ""}" data-act="chip" data-key="${key}" data-val="${esc(v)}">${esc(label(v))}</button>`).join("")}</div></div>`;
-  el.innerHTML = group("Categoría", "categoria", CATS) + group("Formato", "formato", FMTS) + group("Origen", "origen", ORIGS);
+  const orig = `<div class="fg"><h3>Origen</h3><div class="chips">${ORIGS.map(v =>
+    `<button class="chip chip-flag${S.filters.origen.includes(v) ? " on" : ""}" data-act="chip" data-key="origen" data-val="${esc(v)}">${flagHTML(v)}${esc(v)}</button>`).join("")}</div></div>`;
+  el.innerHTML = group("Categoría", "categoria", CATS) + group("Formato", "formato", FMTS) + orig;
 }
 function renderMeta() {
   const n = visibleItems().length, hf = hasFilters();
@@ -253,13 +284,13 @@ function renderChrome() {
   document.querySelectorAll('.seg button').forEach(b => b.classList.toggle("on", b.dataset.val === S.view));
   document.querySelectorAll('#mnav button').forEach(b => b.classList.toggle("on", b.dataset.val === S.member));
 }
-function renderAll() { renderChrome(); renderBanner(); renderFilters(); renderStats(); renderMeta(); renderList(); }
+function renderAll() { renderEnav(); renderChrome(); renderBanner(); renderFilters(); renderStats(); renderMeta(); renderList(); }
 
 function buildMnav() {
   $("#mnav").innerHTML = MEMBERS.map(m => `<button data-act="member" data-val="${esc(m.key)}">${esc(m.label)}</button>`).join("");
 }
-function centerActiveMember(smooth) {
-  const nav = $("#mnav"), b = nav.querySelector(".on");
+function centerActiveMember(smooth, sel = "#mnav") {
+  const nav = $(sel), b = nav.querySelector(".on");
   if (!b) return;
   const left = nav.scrollLeft + (b.getBoundingClientRect().left - nav.getBoundingClientRect().left) - (nav.clientWidth - b.offsetWidth) / 2;
   if (nav.scrollTo) nav.scrollTo({ left, behavior: smooth ? "smooth" : "auto" }); else nav.scrollLeft = left;
@@ -586,8 +617,8 @@ function importData(text, fromExcel = false) {
 }
 
 /* ═════════ Excel (SheetJS se carga solo al usarlo) ═════════ */
-const XL_ORIG = { "Corea": "Korea", "Japón": "Japan", "US/Global": "US" };
-const XL_ORIG_R = { korea: "Corea", japan: "Japón", us: "US/Global", corea: "Corea", "japón": "Japón", "us/global": "US/Global" };
+const XL_ORIG = { "Corea": "Korea", "Japón": "Japan", "US/Global": "US", "Otro": "Other" };
+const XL_ORIG_R = { korea: "Corea", japan: "Japón", us: "US/Global", other: "Otro", otro: "Otro", corea: "Corea", "japón": "Japón", "us/global": "US/Global" };
 const XL_ST = { "Lo tengo": "Owned", "No lo tengo": "Not Owned", "Comprado/En camino": "In transit" };
 const XL_ST_R = { owned: "Lo tengo", "not owned": "No lo tengo", "in transit": "Comprado/En camino" };
 function loadXLSX() {
@@ -625,7 +656,7 @@ async function importXLSX(file) {
       return {
         nombre: String(get(r, "Name")).trim(), artista: String(get(r, "Artist")).trim() || "BTS", era: String(get(r, "Era")).trim(),
         categoria: String(get(r, "Category")).trim() || "Media", formato: String(get(r, "Type")).trim() || "Otros", edicion: String(get(r, "Edition")).trim(),
-        origen: XL_ORIG_R[String(get(r, "Origin")).trim().toLowerCase()] || "Corea", fecha, imagen: String(get(r, "URL Imagen")).trim(),
+        origen: XL_ORIG_R[String(get(r, "Origin")).trim().toLowerCase()] || (String(get(r, "Origin")).trim() ? "Otro" : "Corea"), fecha, imagen: String(get(r, "URL Imagen")).trim(),
         estado: XL_ST_R[String(get(r, "My Collection")).trim().toLowerCase()] || "No lo tengo",
         deseos: get(r, "Wishlist") === true || /^(true|1|si|sí|x)$/i.test(String(get(r, "Wishlist"))), precio: Number(get(r, "Reference price (Yen)")) || 0,
       };
@@ -643,7 +674,8 @@ function onAction(act, el, e) {
     case "pop": return openPop(el, id);
     case "setstate": closePop(); return patchItem(id, { estado: val });
     case "togglewish": closePop(); return patchItem(id, { deseos: !(byId(id) || {}).deseos });
-    case "member": S.member = val; saveUI(); renderChrome(); renderBanner(); renderStats(); renderMeta(); renderList(); return centerActiveMember(true);
+    case "member": S.member = val; S.era = "all"; saveUI(); renderAll(); centerActiveMember(true); return $("#enav").scrollTo ? $("#enav").scrollTo({ left: 0 }) : undefined;
+    case "era": S.era = val; saveUI(); renderAll(); return centerActiveMember(true, "#enav");
     case "view": S.view = val; saveUI(); renderChrome(); return renderList();
     case "new": return openNew();
     case "filters": S.filtersOpen = !S.filtersOpen; renderFilters(); return renderMeta();
@@ -724,8 +756,8 @@ function boot() {
   if (cache) { const d = normData(cache); S.items = d.items; S.deleted = d.deleted; }
   const ui = ls.get(LS.ui, {}) || {};
   S.view = ui.view === "list" ? "list" : "grid"; S.sortAsc = !!ui.sortAsc;
-  S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all";
-  buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false);
+  S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all"; S.era = typeof ui.era === "string" ? ui.era : "all";
+  buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false); centerActiveMember(false, "#enav");
   setStatus(cfgOk() ? "idle" : "off");
   if (cfgOk()) syncNow(); else if (!S.items.length) openSettings();
 }

@@ -273,3 +273,16 @@ main{padding-top:6px;padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 .thumb img{background:transparent;mix-blend-mode:multiply}
 [data-theme="dark"] .thumb img{mix-blend-mode:normal;background:#fff}
 .row-sub .country{margin-left:6px}
+
+/* ═══ Ajustes: eras, banderas, estrella ═══ */
+#enav{padding-top:0;padding-bottom:10px}
+#enav button{font-size:12px;padding:6px 13px;color:var(--text2)}
+.country{display:inline-flex;align-items:center;padding:0!important;border:none!important;background:none!important;vertical-align:middle}
+.country svg{display:block;width:21px;height:14px;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+[data-theme="dark"] .country svg{box-shadow:0 0 0 1px rgba(255,255,255,.2)}
+.chip-flag{display:inline-flex;align-items:center;gap:7px}
+.chip-flag .country svg{width:18px;height:12px}
+.row-sub .country{margin-left:7px}
+:root{--wish:#ffc107}
+.wish-star{top:5px;left:7px;font-size:25px;color:#ffc107;text-shadow:0 0 2px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.35)}
+.row-star{font-size:19px;line-height:1;color:#ffc107;text-shadow:0 0 1px rgba(0,0,0,.45);vertical-align:-2px}
