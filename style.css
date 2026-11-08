@@ -303,3 +303,9 @@ main{padding-top:6px;padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 body.viewer [data-act="new"],body.viewer .qs{display:none}
 body.viewer .card,body.viewer .row{cursor:default}
 body.viewer .row .badge{pointer-events:none}
+
+/* Botón volver arriba */
+.totop{position:fixed;right:max(16px,calc((100vw - 1200px)/2 + 4px));bottom:calc(18px + env(safe-area-inset-bottom));z-index:30;width:46px;height:46px;border-radius:50%;border:none;
+  background:#111;color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.28)}
+[data-theme="dark"] .totop{background:#fff;color:#111}
+.totop:active{transform:scale(.94)}

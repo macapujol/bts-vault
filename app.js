@@ -700,6 +700,7 @@ function onAction(act, el, e) {
     case "setstate": closePop(); return patchItem(id, { estado: val });
     case "togglewish": closePop(); return patchItem(id, { deseos: !(byId(id) || {}).deseos });
     case "member": S.member = val; S.era = "all"; saveUI(); renderAll(); centerActiveMember(true); return $("#enav").scrollTo ? $("#enav").scrollTo({ left: 0 }) : undefined;
+    case "totop": window.scrollTo ? window.scrollTo({ top: 0, behavior: "smooth" }) : null; return;
     case "navscroll": {
       const nav = document.getElementById(el.dataset.for), dx = Number(el.dataset.dir) * nav.clientWidth * 0.7;
       if (nav.scrollBy) nav.scrollBy({ left: dx, behavior: "smooth" }); else nav.scrollLeft += dx;
@@ -771,7 +772,7 @@ function bindEvents() {
   });
   document.addEventListener("error", e => { if (e.target && e.target.tagName === "IMG") e.target.style.display = "none"; }, true);
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closePop(); if (S.modal) closeModal(); } });
-  window.addEventListener("scroll", closePop, { passive: true });
+  window.addEventListener("scroll", () => { closePop(); const b = $("#totop"); if (b) b.hidden = (window.scrollY || document.documentElement.scrollTop) < 600 || !!S.modal; }, { passive: true });
   window.addEventListener("resize", () => { closePop(); updateArrows(); });
   document.addEventListener("scroll", e => { if (e.target.classList && e.target.classList.contains("mnav")) updateArrows(); }, true);
   window.addEventListener("online", () => scheduleSync(300));
