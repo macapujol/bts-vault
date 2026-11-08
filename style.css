@@ -297,3 +297,9 @@ main{padding-top:6px;padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 @media(hover:none){.navarrow{display:none}}
 #enav button.on{color:#fff}
 [data-theme="dark"] #enav button.on{color:#111}
+
+/* Modo lectura (visitas sin token) */
+#syncbtn[data-state="view"]::after{background:var(--text3)}
+body.viewer [data-act="new"],body.viewer .qs{display:none}
+body.viewer .card,body.viewer .row{cursor:default}
+body.viewer .row .badge{pointer-events:none}

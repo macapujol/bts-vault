@@ -30,6 +30,8 @@ const STATES = [
   { key: "No lo tengo", label: "No lo tengo", short: "Me falta", cls: "miss" },
 ];
 const stateOf = k => STATES.find(s => s.key === k) || STATES[2];
+/* Colección pública (solo lectura para visitas). Si el repositorio de datos es público, cualquiera puede ver; editar exige el token. */
+const PUBLIC = { owner: "macapujol", repo: "bts-vault-data", branch: "main", path: "data.json" };
 const LS = { cfg: "vault:cfg", cache: "vault:cache", ui: "vault:ui", theme: "vault:theme" };
 
 /* ═════════ Utilidades ═════════ */
@@ -214,7 +216,7 @@ function renderRow(it) {
     <div class="thumb">${imgHTML(it)}</div>
     <div class="row-info"><div class="row-name">${nameHTML(it)}${it.deseos ? ` <span class="row-star">★</span>` : ""}</div>
       <div class="row-sub">${esc(it.artista)} · ${esc(it.categoria)} · ${esc(it.formato)}${it.fecha ? " · " + fmtDate(it.fecha) : ""}${flagHTML(it.origen)}</div></div>
-    <button class="badge st-${s.cls}" data-act="pop" data-id="${esc(it.id)}">${s.short} ▾</button>
+    <button class="badge st-${s.cls}" data-act="pop" data-id="${esc(it.id)}">${s.short}${viewer() ? "" : " ▾"}</button>
   </div>`;
 }
 function groupHTML(g) {
@@ -230,6 +232,7 @@ function renderList() {
   const host = $("#list"), items = visibleItems();
   if (!S.items.length) {
     const on = cfgOk();
+    if (!on) { host.innerHTML = `<div class="empty"><h2>${Sync.busy || S.status.state === "busy" ? "Cargando colección…" : "No se pudo cargar la colección"}</h2><p>${esc(S.status.msg || "")}</p></div>`; return; }
     host.innerHTML = `<div class="empty"><h2>Aún no hay items</h2><p>${on
       ? (Sync.busy ? "Cargando tu colección desde GitHub…" : "El archivo data.json está vacío o no existe todavía. Impórtalo desde Ajustes.")
       : "Conecta tu repositorio de GitHub en Ajustes para cargar tu colección."}</p>
@@ -449,11 +452,12 @@ function setStatus(state, msg = "") {
   const b = $("#syncbtn");
   b.dataset.state = state;
   b.textContent = state === "busy" ? "⟳" : "☁";
-  b.title = { off: "Sin configurar: toca para conectar GitHub", idle: "Conectado", busy: "Sincronizando…", ok: "Sincronizado", err: msg || "Error de sincronización" }[state];
+  b.title = { off: "Sin configurar: toca para conectar GitHub", idle: "Conectado", view: "Modo lectura. Toca para entrar como propietario", busy: "Sincronizando…", ok: "Sincronizado", err: msg || "Error de sincronización" }[state];
   if (state === "err" && (prev.state !== "err" || prev.msg !== msg)) toast(msg, 6000);
 }
 
 /* ═════════ Sincronización con GitHub ═════════ */
+const viewer = () => !cfgOk();
 const cfgOk = () => !!(S.cfg && S.cfg.owner && S.cfg.repo && S.cfg.token);
 const ghHeaders = (cfg = S.cfg) => ({ Authorization: "Bearer " + cfg.token, Accept: "application/vnd.github+json" });
 const ghFileUrl = (cfg = S.cfg) => `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path.split("/").map(encodeURIComponent).join("/")}`;
@@ -470,8 +474,18 @@ function applyData(d) {
   S.items = d.items; S.deleted = pruneDeleted(d.deleted);
   persistLocal(); renderAll();
 }
+async function loadPublic() {
+  Sync.last = Date.now(); setStatus("busy");
+  try {
+    const r = await fetch(`https://api.github.com/repos/${PUBLIC.owner}/${PUBLIC.repo}/contents/${PUBLIC.path}?ref=${PUBLIC.branch}&t=${Date.now()}`, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
+    if (!r.ok) throw new Error(r.status === 404 ? "Esta colección no es pública." : r.status === 403 ? "GitHub limitó las consultas; prueba en unos minutos." : `GitHub respondió ${r.status}.`);
+    const j = await r.json();
+    const d = normData(JSON.parse(b64ToUtf8(j.content)));
+    S.items = d.items; S.deleted = {}; persistLocal(); renderAll(); setStatus("view");
+  } catch (e) { setStatus("err", isNetErr(e) ? "Sin conexión." : e.message); renderAll(); }
+}
 function scheduleSync(ms = 1800) {
-  if (!cfgOk()) return;
+  if (!cfgOk()) { if (Date.now() - Sync.last > 120000) loadPublic(); return; }
   clearTimeout(Sync.timer); Sync.timer = setTimeout(syncNow, ms);
 }
 async function syncNow() {
@@ -565,7 +579,7 @@ async function cfgSave() {
   cfgMsg("Probando conexión…");
   try {
     const warn = await testConn(cfg);
-    S.cfg = cfg; ls.set(LS.cfg, cfg);
+    S.cfg = cfg; ls.set(LS.cfg, cfg); document.body.classList.remove("viewer");
     closeModal(); toast(warn || "Conectado a GitHub ✓", warn ? 6000 : 3200);
     setStatus("idle"); syncNow();
   } catch (e) { cfgMsg(e.message, "err"); }
@@ -573,7 +587,7 @@ async function cfgSave() {
 function cfgFrom() {
   const cfg = cfgFromString($("#cfg-from").value);
   if (!cfg) return cfgMsg("Ese enlace no trae una configuración válida.", "err");
-  S.cfg = cfg; ls.set(LS.cfg, cfg);
+  S.cfg = cfg; ls.set(LS.cfg, cfg); document.body.classList.remove("viewer");
   closeModal(); toast("Configuración aplicada ✓"); setStatus("idle"); syncNow();
 }
 function cfgLink() {
@@ -585,7 +599,7 @@ function cfgLink() {
 }
 function cfgClear() {
   if (!window.confirm("¿Quitar el token de este dispositivo? Tus datos locales se conservan.")) return;
-  S.cfg = null; ls.del(LS.cfg); setStatus("off"); closeModal(); toast("Token eliminado de este dispositivo");
+  S.cfg = null; ls.del(LS.cfg); document.body.classList.add("viewer"); setStatus("view"); closeModal(); toast("Token eliminado de este dispositivo");
 }
 
 /* ═════════ Exportar / importar ═════════ */
@@ -679,6 +693,7 @@ async function importXLSX(file) {
 /* ═════════ Eventos ═════════ */
 function onAction(act, el, e) {
   const { id, val, key } = el.dataset;
+  if (viewer() && ["edit", "pop", "setstate", "togglewish", "new", "save", "askdel", "confirmdel", "dstate", "dwish"].includes(act)) return;
   switch (act) {
     case "edit": return openEdit(id);
     case "pop": return openPop(el, id);
@@ -774,8 +789,9 @@ function boot() {
   S.view = ui.view === "list" ? "list" : "grid"; S.sortAsc = !!ui.sortAsc;
   S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all"; S.era = typeof ui.era === "string" ? ui.era : "all";
   buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false); centerActiveMember(false, "#enav"); updateArrows();
-  setStatus(cfgOk() ? "idle" : "off");
-  if (cfgOk()) syncNow(); else if (!S.items.length) openSettings();
+  document.body.classList.toggle("viewer", viewer());
+  setStatus(cfgOk() ? "idle" : "view");
+  if (cfgOk()) syncNow(); else loadPublic();
 }
 window.__vault = { S, Sync, mergeData, normData, serialize, groupItems, syncNow, onAction, renderAll };   // utilidades de depuración
 boot();
