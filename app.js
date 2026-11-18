@@ -14,21 +14,23 @@ const MEMBERS = [
 const CATS = ["Album", "Single", "LIVE SHOW", "MUSTER", "Video/Documental", "Media", "VARIETY SHOW", "MEMORIES", "SEASON'S GREETINGS", "SEASON PACKAGE"];
 const FMTS = ["CD", "BLU-RAY", "DVD", "Vinyl", "Cassette", "Digital Code", "NFC", "Photobook", "CD+DVD", "CD+BLU-RAY", "Set Book/DVD", "Otros"];
 const ORIGS = ["Corea", "Japón", "US/Global", "Otro"];
-const FLAGS = (() => {
-  const us = (() => { let st = ""; for (let i = 0; i < 13; i += 2) st += `<rect y="${(i * 16 / 13).toFixed(2)}" width="24" height="${(16 / 13).toFixed(2)}" fill="#b22234"/>`;
-    let stars = ""; for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) stars += `<circle cx="${1.6 + c * 2.3}" cy="${1.5 + r * 2.4}" r=".5" fill="#fff"/>`;
-    return `<rect width="24" height="16" fill="#fff"/>${st}<rect width="10.5" height="8.6" fill="#3c3b6e"/>${stars}`; })();
-  const tri = a => `<g transform="rotate(${a} 12 8)"><path d="M9.6 2.1h4.8M9.6 3.3h4.8M9.6 4.5h4.8" stroke="#111" stroke-width=".55"/></g>`;
-  const kr = `<rect width="24" height="16" fill="#fff"/><path d="M8.8 8a3.2 3.2 0 0 1 6.4 0a1.6 1.6 0 0 1-3.2 0a1.6 1.6 0 0 0-3.2 0z" fill="#cd2e3a"/><path d="M8.8 8a3.2 3.2 0 0 0 6.4 0a1.6 1.6 0 0 0-3.2 0a1.6 1.6 0 0 1-3.2 0z" fill="#0047a0"/>${[-56.3, 56.3, 123.7, -123.7].map(tri).join("")}`;
-  const jp = `<rect width="24" height="16" fill="#fff"/><circle cx="12" cy="8" r="4.8" fill="#bc002d"/>`;
-  const other = `<rect width="24" height="16" fill="#e9e9ee"/><g fill="none" stroke="#7a7a8c" stroke-width=".9"><circle cx="12" cy="8" r="5.2"/><ellipse cx="12" cy="8" rx="2.3" ry="5.2"/><path d="M6.8 8h10.4"/></g>`;
-  return { "Corea": kr, "Japón": jp, "US/Global": us, "Otro": other };
-})();
+const FLAGS = {
+  "Corea": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBpZD0iZmxhZy1pY29ucy1rciIgdmlld0JveD0iMCAwIDY0MCA0ODAiPgogIDxkZWZzPgogICAgPGNsaXBQYXRoIGlkPSJrci1hIj4KICAgICAgPHBhdGggZmlsbC1vcGFjaXR5PSIuNyIgZD0iTS05NS44LS40aDY4Mi43djUxMkgtOTUuOHoiLz4KICAgIDwvY2xpcFBhdGg+CiAgPC9kZWZzPgogIDxnIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1wYXRoPSJ1cmwoI2tyLWEpIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4OS44IC40KXNjYWxlKC45Mzc1KSI+CiAgICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNLTk1LjgtLjRINTg3djUxMkgtOTUuOFoiLz4KICAgIDxnIHRyYW5zZm9ybT0icm90YXRlKC01Ni4zIDM2MS42IC0xMDEuMylzY2FsZSgxMC42NjY2NykiPgogICAgICA8ZyBpZD0ia3ItYyI+CiAgICAgICAgPHBhdGggaWQ9ImtyLWIiIGZpbGw9IiMwMDAwMDEiIGQ9Ik0tNi0yNkg2djJILTZabTAgM0g2djJILTZabTAgM0g2djJILTZaIi8+CiAgICAgICAgPHVzZSB4bGluazpocmVmPSIja3ItYiIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgeT0iNDQiLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBzdHJva2U9IiNmZmYiIGQ9Ik0wIDE3djEwIi8+CiAgICAgIDxwYXRoIGZpbGw9IiNjZDJlM2EiIGQ9Ik0wLTEyYTEyIDEyIDAgMCAxIDAgMjRaIi8+CiAgICAgIDxwYXRoIGZpbGw9IiMwMDQ3YTAiIGQ9Ik0wLTEyYTEyIDEyIDAgMCAwIDAgMjRBNiA2IDAgMCAwIDAgMFoiLz4KICAgICAgPGNpcmNsZSBjeT0iLTYiIHI9IjYiIGZpbGw9IiNjZDJlM2EiLz4KICAgIDwvZz4KICAgIDxnIHRyYW5zZm9ybT0icm90YXRlKC0xMjMuNyAxOTEuMiA2Mi4yKXNjYWxlKDEwLjY2NjY3KSI+CiAgICAgIDx1c2UgeGxpbms6aHJlZj0iI2tyLWMiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz4KICAgICAgPHBhdGggc3Ryb2tlPSIjZmZmIiBkPSJNMC0yMy41djNNMCAxN3YzLjVtMCAzdjMiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPgo=",
+  "Japón": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWpwIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPGRlZnM+CiAgICA8Y2xpcFBhdGggaWQ9ImpwLWEiPgogICAgICA8cGF0aCBmaWxsLW9wYWNpdHk9Ii43IiBkPSJNLTg4IDMyaDY0MHY0ODBILTg4eiIvPgogICAgPC9jbGlwUGF0aD4KICA8L2RlZnM+CiAgPGcgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2Utd2lkdGg9IjFwdCIgY2xpcC1wYXRoPSJ1cmwoI2pwLWEpIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4OCAtMzIpIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0tMTI4IDMyaDcyMHY0ODBoLTcyMHoiLz4KICAgIDxjaXJjbGUgY3g9IjUyMy4xIiBjeT0iMzQ0LjEiIHI9IjE5NC45IiBmaWxsPSIjYmMwMDJkIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTY4LjQgOC42KXNjYWxlKC43NjU1NCkiLz4KICA8L2c+Cjwvc3ZnPgo=",
+  "US/Global": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLXVzIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+CiAgPHBhdGggZmlsbD0iI2JkM2Q0NCIgZD0iTTAgMGg2NDB2NDgwSDAiLz4KICA8cGF0aCBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMzciIGQ9Ik0wIDU1LjNoNjQwTTAgMTI5aDY0ME0wIDIwM2g2NDBNMCAyNzdoNjQwTTAgMzUxaDY0ME0wIDQyNWg2NDAiLz4KICA8cGF0aCBmaWxsPSIjMTkyZjVkIiBkPSJNMCAwaDM2NC44djI1OC41SDAiLz4KICA8bWFya2VyIGlkPSJ1cy1hIiBtYXJrZXJIZWlnaHQ9IjMwIiBtYXJrZXJXaWR0aD0iMzAiPgogICAgPHBhdGggZmlsbD0iI2ZmZiIgZD0ibTE0IDAgOSAyN0wwIDEwaDI4TDUgMjd6Ii8+CiAgPC9tYXJrZXI+CiAgPHBhdGggZmlsbD0ibm9uZSIgbWFya2VyLW1pZD0idXJsKCN1cy1hKSIgZD0ibTAgMCAxNiAxMWg2MSA2MSA2MSA2MSA2MEw0NyAzN2g2MSA2MSA2MCA2MUwxNiA2M2g2MSA2MSA2MSA2MSA2MEw0NyA4OWg2MSA2MSA2MCA2MUwxNiAxMTVoNjEgNjEgNjEgNjEgNjBMNDcgMTQxaDYxIDYxIDYwIDYxTDE2IDE2Nmg2MSA2MSA2MSA2MSA2MEw0NyAxOTJoNjEgNjEgNjAgNjFMMTYgMjE4aDYxIDYxIDYxIDYxIDYweiIvPgo8L3N2Zz4K",
+  "Otro": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNDgwIj48cmVjdCB3aWR0aD0iNjQwIiBoZWlnaHQ9IjQ4MCIgZmlsbD0iI2VjZWNmMSIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdhN2E4YyIgc3Ryb2tlLXdpZHRoPSIyMiI+PGNpcmNsZSBjeD0iMzIwIiBjeT0iMjQwIiByPSIxNDAiLz48ZWxsaXBzZSBjeD0iMzIwIiBjeT0iMjQwIiByeD0iNjIiIHJ5PSIxNDAiLz48cGF0aCBkPSJNMTgwIDI0MGgyODAiLz48L2c+PC9zdmc+",
+};
 const STATES = [
   { key: "Lo tengo", label: "Lo tengo", short: "Lo tengo", cls: "have" },
   { key: "Comprado/En camino", label: "Comprado / en camino", short: "En camino", cls: "way" },
   { key: "No lo tengo", label: "No lo tengo", short: "Me falta", cls: "miss" },
+  { key: "No me interesa", label: "No me interesa", short: "No me interesa", cls: "skip" },
 ];
+const ICONS = {
+  have: '<path d="M6 12.5l4 4 8-9"/>', miss: '<path d="M7 7l10 10M17 7L7 17"/>',
+  way: '<path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5"/>', skip: '<path d="M6.5 12h11"/>',
+};
+const stIcon = cls => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[cls]}</svg>`;
 const stateOf = k => STATES.find(s => s.key === k) || STATES[2];
 /* Colección pública (solo lectura para visitas). Si el repositorio de datos es público, cualquiera puede ver; editar exige el token. */
 const PUBLIC = { owner: "macapujol", repo: "bts-vault-data", branch: "main", path: "data.json" };
@@ -121,14 +123,30 @@ const saveUI = () => ls.set(LS.ui, { view: S.view, sortAsc: S.sortAsc, member: S
 function touch() { S.rev++; persistLocal(); scheduleSync(); }
 
 /* ═════════ Eras ═════════ */
+const eraKind = (() => {
+  let cache = null, n = -1;
+  return name => {
+    if (n !== S.items.length || !cache) {
+      cache = new Map(); n = S.items.length;
+      S.items.forEach(i => { if (i.era && i.artista === "BTS") cache.set(i.era, 0); });
+    }
+    if (/^(other|others|otros|otro)$/i.test(name)) return 3;
+    return cache.has(name) ? 0 : 1;   // 0 grupales, 1 solistas, 3 "Other" al final
+  };
+})();
 function eraList() {
   const first = new Map();
   S.items.forEach(i => {
     if (!i.era || (S.member !== "all" && i.artista !== S.member)) return;
-    const d = i.fecha || "9999";
-    if (!first.has(i.era) || d < first.get(i.era)) first.set(i.era, d);
+    const d = i.fecha || "";
+    if (!first.has(i.era) || (d && (!first.get(i.era) || d < first.get(i.era)))) first.set(i.era, d);
   });
-  return [...first.entries()].sort((a, b) => a[1].localeCompare(b[1]) || a[0].localeCompare(b[0])).map(e => e[0]);
+  const dir = S.sortAsc ? 1 : -1;
+  return [...first.entries()].sort((a, b) => {
+    const k = eraKind(a[0]) - eraKind(b[0]); if (k) return k;
+    if (!a[1] !== !b[1]) return a[1] ? -1 : 1;
+    return (a[1] || "").localeCompare(b[1] || "") * dir || a[0].localeCompare(b[0]);
+  }).map(e => e[0]);
 }
 function renderEnav() {
   const el = $("#enav"), left = el.scrollLeft, list = eraList();
@@ -191,7 +209,7 @@ function groupItems(items) {
 }
 
 /* ═════════ Render ═════════ */
-const flagHTML = o => `<span class="country" title="${esc(o)}"><svg viewBox="0 0 24 16" aria-label="${esc(o)}">${FLAGS[o] || FLAGS["Otro"]}</svg></span>`;
+const flagHTML = o => `<span class="country" title="${esc(o)}"><img src="${FLAGS[o] || FLAGS["Otro"]}" alt="${esc(o)}" width="20" height="15"></span>`;
 const imgHTML = it => (it.imagen ? `<img src="${esc(it.imagen)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : "");
 const nameHTML = it => `<strong>${esc(it.nombre)}</strong>${it.edicion ? ` <span class="ed">· ${esc(it.edicion)}</span>` : ""}`;
 
@@ -200,7 +218,7 @@ function renderCard(it) {
   return `<article class="card" data-act="edit" data-id="${esc(it.id)}">
     <div class="cover">${imgHTML(it)}
       ${it.deseos ? `<span class="wish-star" title="En lista de deseos">★</span>` : ""}
-      <button class="qs st-${s.cls}" data-act="pop" data-id="${esc(it.id)}" aria-label="Cambiar estado">${s.cls === "have" ? "✓" : s.cls === "way" ? "→" : "✗"}</button>
+      <button class="qs st-${s.cls}" data-act="pop" data-id="${esc(it.id)}" aria-label="Cambiar estado">${stIcon(s.cls)}</button>
     </div>
     <div class="card-body">
       <div class="card-name">${nameHTML(it)}</div>
@@ -246,7 +264,7 @@ function renderList() {
   host.innerHTML = groupItems(items).map(groupHTML).join("");
 }
 function renderBanner() {
-  const scope = S.items.filter(i => (S.member === "all" || i.artista === S.member) && (S.era === "all" || i.era === S.era));
+  const scope = S.items.filter(i => (S.member === "all" || i.artista === S.member) && (S.era === "all" || i.era === S.era) && i.estado !== "No me interesa");
   const have = scope.filter(i => i.estado === "Lo tengo").length;
   const pct = scope.length ? Math.round(have / scope.length * 100) : 0;
   const m = MEMBERS.find(x => x.key === S.member);
@@ -264,6 +282,7 @@ function renderStats() {
     + btn("have", "Lo tengo", n("Lo tengo"), f.estado === "Lo tengo", "Lo tengo")
     + btn("way", "En camino", n("Comprado/En camino"), f.estado === "Comprado/En camino", "Comprado/En camino")
     + btn("miss", "Me falta", n("No lo tengo"), f.estado === "No lo tengo", "No lo tengo")
+    + btn("skip", "No me interesa", n("No me interesa"), f.estado === "No me interesa", "No me interesa")
     + btn("wish", "★ Deseos", base.filter(i => i.deseos).length, f.deseos, "wish");
   el.scrollLeft = left;
 }
@@ -331,33 +350,40 @@ const overlay = inner => `<div class="overlay" data-act="overlay"><div class="sh
 const previewHTML = url => (url ? `<div class="preview"><img src="${esc(url)}" alt="" referrerpolicy="no-referrer"></div>` : "");
 
 function itemFormHTML() {
-  const m = S.modal, d = m.draft;
-  const sel = (field, list, cur) => {
+  const m = S.modal, sh = m.shared, n = m.eds.length;
+  const sel = (field, list, cur, ed = "s") => {
     const l = !cur || list.includes(cur) ? list : [...list, cur];
-    return `<select data-field="${field}">${l.map(v => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("")}</select>`;
+    return `<select data-field="${field}" data-ed="${ed}">${l.map(v => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("")}</select>`;
   };
+  const eras = [...new Set(S.items.map(i => i.era).filter(Boolean))];
+  const block = (e, i) => `<div class="edblock">
+      <div class="edhead"><span>${m.isNew ? `Edición ${i + 1}` : "Datos de esta edición"}</span>${n > 1 ? `<button type="button" class="linkbtn" data-act="rmed" data-ed="${i}">Quitar</button>` : ""}</div>
+      <div class="two"><div class="field"><label>Origen</label>${sel("origen", ORIGS, e.origen, i)}</div>
+        <div class="field"><label>Edición</label><input data-field="edicion" data-ed="${i}" value="${esc(e.edicion)}" placeholder="Regular, Type A…" autocomplete="off"></div></div>
+      <div class="two"><div class="field"><label>Fecha</label><input type="date" data-field="fecha" data-ed="${i}" value="${esc(e.fecha)}"></div>
+        <div class="field"><label>Precio de referencia (¥)</label><input data-field="precio" data-ed="${i}" type="number" inputmode="numeric" min="0" value="${e.precio || ""}" placeholder="0"></div></div>
+      <div class="field"><label>Estado</label><div class="opts">${STATES.map(s => `<button type="button" class="opt${e.estado === s.key ? " on st-" + s.cls : ""}" data-act="dstate" data-ed="${i}" data-val="${esc(s.key)}"><span class="dot st-${s.cls}"></span>${esc(s.label)}</button>`).join("")}
+        <button type="button" class="opt wish${e.deseos ? " on" : ""}" data-act="dwish" data-ed="${i}">${e.deseos ? "★ En lista de deseos" : "☆ Agregar a lista de deseos"}</button></div></div>
+      <div class="field"><label>URL de imagen</label><input data-field="imagen" data-ed="${i}" value="${esc(e.imagen)}" placeholder="https://…" inputmode="url" autocapitalize="off" autocomplete="off"><div id="preview-${i}">${previewHTML(e.imagen)}</div></div>
+    </div>`;
   return overlay(`
     <div class="sheet-head"><h2>${m.isNew ? "Nuevo item" : "Editar item"}</h2><button class="x" data-act="close" aria-label="Cerrar">×</button></div>
     <div class="sheet-body">
-      <div class="field"><label>Nombre *</label><input data-field="nombre" value="${esc(d.nombre)}" placeholder="Ej: MAP OF THE SOUL: 7" autocomplete="off"></div>
-      <div class="two"><div class="field"><label>Artista</label>${sel("artista", ARTISTS, d.artista)}</div><div class="field"><label>Categoría</label>${sel("categoria", CATS, d.categoria)}</div></div>
-      <div class="two"><div class="field"><label>Formato</label>${sel("formato", FMTS, d.formato)}</div><div class="field"><label>Origen</label>${sel("origen", ORIGS, d.origen)}</div></div>
-      <div class="two"><div class="field"><label>Edición</label><input data-field="edicion" value="${esc(d.edicion)}" placeholder="Regular, Type A…" autocomplete="off"></div>
-        <div class="field"><label>Fecha</label><input type="date" data-field="fecha" value="${esc(d.fecha)}"></div></div>
-      <div class="field"><label>Estado</label><div class="opts">${STATES.map(s => `<button type="button" class="opt${d.estado === s.key ? " on st-" + s.cls : ""}" data-act="dstate" data-val="${esc(s.key)}"><span class="dot st-${s.cls}"></span>${esc(s.label)}</button>`).join("")}
-        <button type="button" class="opt wish${d.deseos ? " on" : ""}" data-act="dwish">${d.deseos ? "★ En lista de deseos" : "☆ Agregar a lista de deseos"}</button></div></div>
-      <div class="two"><div class="field"><label>Era / proyecto</label><input data-field="era" value="${esc(d.era)}" placeholder="MAP OF THE SOUL…" autocomplete="off"></div>
-        <div class="field"><label>Precio de referencia (¥)</label><input data-field="precio" type="number" inputmode="numeric" min="0" value="${d.precio || ""}" placeholder="0"></div></div>
-      <div class="field"><label>URL de imagen</label><input data-field="imagen" value="${esc(d.imagen)}" placeholder="https://…" inputmode="url" autocapitalize="off" autocomplete="off"><div id="preview-host">${previewHTML(d.imagen)}</div></div>
+      <div class="field"><label>Nombre *</label><input data-field="nombre" data-ed="s" value="${esc(sh.nombre)}" placeholder="Ej: MAP OF THE SOUL: 7" autocomplete="off"></div>
+      <div class="two"><div class="field"><label>Artista</label>${sel("artista", ARTISTS, sh.artista)}</div><div class="field"><label>Categoría</label>${sel("categoria", CATS, sh.categoria)}</div></div>
+      <div class="two"><div class="field"><label>Formato</label>${sel("formato", FMTS, sh.formato)}</div>
+        <div class="field"><label>Era / proyecto</label><input data-field="era" data-ed="s" list="eras-list" value="${esc(sh.era)}" placeholder="MAP OF THE SOUL…" autocomplete="off"><datalist id="eras-list">${eras.map(v => `<option value="${esc(v)}">`).join("")}</datalist></div></div>
+      ${m.eds.map(block).join("")}
+      ${m.isNew ? `<button type="button" class="btn-ghost addbtn" data-act="addEd">+ Agregar otra edición</button>` : ""}
     </div>
     <div class="sheet-foot">
       <button class="btn-ghost" data-act="close">Cancelar</button>
-      <button id="savebtn" class="btn-primary" data-act="save"${d.nombre.trim() ? "" : " disabled"}>${m.isNew ? "Agregar" : "Guardar cambios"}</button>
+      <button id="savebtn" class="btn-primary" data-act="save"${sh.nombre.trim() ? "" : " disabled"}>${m.isNew ? (n > 1 ? `Agregar ${n} ediciones` : "Agregar") : "Guardar cambios"}</button>
       ${m.isNew ? "" : `<button class="btn-danger" data-act="askdel">Eliminar este item</button>`}
     </div>`);
 }
 function confirmHTML() {
-  const d = S.modal.back.draft;
+  const b = S.modal.back, d = { nombre: b.shared.nombre, edicion: b.eds[0].edicion };
   return overlay(`
     <div class="sheet-head"><h2>¿Eliminar este item?</h2><button class="x" data-act="canceldel" aria-label="Cerrar">×</button></div>
     <div class="sheet-body"><p class="note"><b>${esc(d.nombre)}</b>${d.edicion ? " · " + esc(d.edicion) : ""}<br>Se quitará de tu colección en todos tus dispositivos. Esta acción no se puede deshacer.</p></div>
@@ -404,14 +430,19 @@ function renderModal(resetScroll) {
 }
 function closeModal() { S.modal = null; renderModal(true); }
 function openSettings() { closePop(); S.modal = { type: "settings" }; renderModal(true); }
+const blankEd = () => ({ origen: "Corea", edicion: "", fecha: "", estado: "No lo tengo", deseos: false, precio: 0, imagen: "" });
+const EDKEYS = ["origen", "edicion", "fecha", "estado", "deseos", "precio", "imagen"];
 function openNew() {
   closePop();
-  S.modal = { type: "item", isNew: true, draft: norm({ id: "tmp", nombre: "x", artista: S.member === "all" ? "BTS" : S.member, categoria: "Album", formato: "CD", origen: "Corea", estado: "No lo tengo" }) };
-  S.modal.draft.nombre = ""; renderModal(true);
+  S.modal = { type: "item", isNew: true, shared: { nombre: "", artista: S.member === "all" ? "BTS" : S.member, categoria: "Album", formato: "CD", era: S.era === "all" ? "" : S.era }, eds: [blankEd()] };
+  renderModal(true);
 }
 function openEdit(id) {
   const it = byId(id); if (!it) return;
-  closePop(); S.modal = { type: "item", isNew: false, draft: { ...it } }; renderModal(true);
+  closePop();
+  const ed = {}; EDKEYS.forEach(k => { ed[k] = it[k]; });
+  S.modal = { type: "item", isNew: false, id, shared: { nombre: it.nombre, artista: it.artista, categoria: it.categoria, formato: it.formato, era: it.era }, eds: [ed] };
+  renderModal(true);
 }
 
 /* ═════════ Acciones sobre items ═════════ */
@@ -420,12 +451,14 @@ function patchItem(id, patch) {
   touch(); renderAll();
 }
 function saveDraft() {
-  const d = S.modal.draft; d.nombre = d.nombre.trim();
-  if (!d.nombre) return;
-  d.mod = Date.now();
-  if (S.modal.isNew) { d.id = uid(); S.items = [...S.items, norm(d)]; }
-  else S.items = S.items.map(i => (i.id === d.id ? norm(d) : i));
+  const m = S.modal, nombre = m.shared.nombre.trim();
+  if (!nombre) return;
+  const now = Date.now(), mk = (e, id) => norm({ ...m.shared, nombre, ...e, id, mod: now });
+  if (m.isNew) S.items = [...S.items, ...m.eds.map(e => mk(e, uid()))];
+  else S.items = S.items.map(i => (i.id === m.id ? mk(m.eds[0], m.id) : i));
+  const n = m.eds.length;
   closeModal(); touch(); renderAll();
+  if (m.isNew && n > 1) toast(`${n} ediciones agregadas`);
 }
 function deleteItem(id) {
   S.items = S.items.filter(i => i.id !== id); S.deleted[id] = Date.now();
@@ -643,8 +676,8 @@ function importData(text, fromExcel = false) {
 /* ═════════ Excel (SheetJS se carga solo al usarlo) ═════════ */
 const XL_ORIG = { "Corea": "Korea", "Japón": "Japan", "US/Global": "US", "Otro": "Other" };
 const XL_ORIG_R = { korea: "Corea", japan: "Japón", us: "US/Global", other: "Otro", otro: "Otro", corea: "Corea", "japón": "Japón", "us/global": "US/Global" };
-const XL_ST = { "Lo tengo": "Owned", "No lo tengo": "Not Owned", "Comprado/En camino": "In transit" };
-const XL_ST_R = { owned: "Lo tengo", "not owned": "No lo tengo", "in transit": "Comprado/En camino" };
+const XL_ST = { "Lo tengo": "Owned", "No lo tengo": "Not Owned", "Comprado/En camino": "In transit", "No me interesa": "Not interested" };
+const XL_ST_R = { owned: "Lo tengo", "not owned": "No lo tengo", "in transit": "Comprado/En camino", "not interested": "No me interesa" };
 function loadXLSX() {
   if (window.XLSX) return Promise.resolve(window.XLSX);
   return new Promise((ok, no) => {
@@ -692,8 +725,8 @@ async function importXLSX(file) {
 
 /* ═════════ Eventos ═════════ */
 function onAction(act, el, e) {
-  const { id, val, key } = el.dataset;
-  if (viewer() && ["edit", "pop", "setstate", "togglewish", "new", "save", "askdel", "confirmdel", "dstate", "dwish"].includes(act)) return;
+  const { id, val, key, ed } = el.dataset;
+  if (viewer() && ["edit", "pop", "setstate", "togglewish", "new", "save", "askdel", "confirmdel", "dstate", "dwish", "addEd", "rmed"].includes(act)) return;
   switch (act) {
     case "edit": return openEdit(id);
     case "pop": return openPop(el, id);
@@ -727,12 +760,18 @@ function onAction(act, el, e) {
     case "settings": return openSettings();
     case "overlay": if (e.target === el) closeModal(); return;
     case "close": return closeModal();
-    case "dstate": S.modal.draft.estado = val; return renderModal();
-    case "dwish": S.modal.draft.deseos = !S.modal.draft.deseos; return renderModal();
+    case "dstate": S.modal.eds[+ed].estado = val; return renderModal();
+    case "dwish": S.modal.eds[+ed].deseos = !S.modal.eds[+ed].deseos; return renderModal();
+    case "addEd": {
+      const last = S.modal.eds[S.modal.eds.length - 1];
+      S.modal.eds.push({ ...blankEd(), origen: last.origen, fecha: last.fecha }); renderModal();
+      const body = $("#modal .sheet-body"); if (body) body.scrollTop = body.scrollHeight; return;
+    }
+    case "rmed": S.modal.eds.splice(+ed, 1); return renderModal();
     case "save": return saveDraft();
     case "askdel": S.modal = { type: "confirm", back: S.modal }; return renderModal(true);
     case "canceldel": S.modal = S.modal.back; return renderModal(true);
-    case "confirmdel": return deleteItem(S.modal.back.draft.id);
+    case "confirmdel": return deleteItem(S.modal.back.id);
     case "cfgsave": return cfgSave();
     case "cfgfrom": return cfgFrom();
     case "cfglink": return cfgLink();
@@ -753,16 +792,18 @@ function bindEvents() {
     const t = e.target;
     if (t.id === "q") { S.filters.search = t.value; renderMeta(); renderStats(); return renderList(); }
     const f = t.dataset && t.dataset.field;
-    if (f && S.modal && S.modal.draft) {
-      S.modal.draft[f] = f === "precio" ? Math.max(0, Math.round(Number(t.value) || 0)) : t.value;
+    if (f && S.modal && S.modal.shared) {
+      const tgt = t.dataset.ed === "s" ? S.modal.shared : S.modal.eds[Number(t.dataset.ed)];
+      if (tgt) tgt[f] = f === "precio" ? Math.max(0, Math.round(Number(t.value) || 0)) : t.value;
       if (f === "nombre") { const b = $("#savebtn"); if (b) b.disabled = !t.value.trim(); }
     }
   });
   document.addEventListener("change", e => {
     const t = e.target, f = t.dataset && t.dataset.field;
-    if (f && S.modal && S.modal.draft) {
-      S.modal.draft[f] = t.value;
-      if (f === "imagen") { const h = $("#preview-host"); if (h) h.innerHTML = previewHTML(t.value.trim()); }
+    if (f && S.modal && S.modal.shared) {
+      const tgt = t.dataset.ed === "s" ? S.modal.shared : S.modal.eds[Number(t.dataset.ed)];
+      if (tgt) tgt[f] = f === "precio" ? Math.max(0, Math.round(Number(t.value) || 0)) : t.value;
+      if (f === "imagen") { const h = $("#preview-" + t.dataset.ed); if (h) h.innerHTML = previewHTML(t.value.trim()); }
     }
     if (t.id === "imp-file" && t.files && t.files[0]) {
       const file = t.files[0]; t.value = "";

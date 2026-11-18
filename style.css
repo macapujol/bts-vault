@@ -309,3 +309,51 @@ body.viewer .row .badge{pointer-events:none}
   background:#111;color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.28)}
 [data-theme="dark"] .totop{background:#fff;color:#111}
 .totop:active{transform:scale(.94)}
+
+/* ═══ Ronda de ajustes (nov 2026) ═══ */
+:root{
+  --font-body:'Bricolage Grotesque','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-head:'Jost','Montserrat','Century Gothic',system-ui,sans-serif;
+  --skip-bg:#eeeeee;--skip-fg:#6b6b6b;--stripe:#5a5a5a;
+  --have-solid:#2fb344;--way-solid:#f0a020;--miss-solid:#e5414f;--skip-solid:#9a9aa5;
+}
+[data-theme="dark"]{--skip-bg:#2a2a2a;--skip-fg:#a5a5a5;--stripe:#b5b5b5}
+body,input,select,textarea,button{font-family:var(--font-body)}
+/* tipografía de títulos: mayúsculas geométricas, aireadas */
+.banner h1{font-family:var(--font-head);font-weight:500;text-transform:uppercase;letter-spacing:.07em;font-size:26px}
+#mnav button{font-family:var(--font-head);font-weight:500;text-transform:uppercase;letter-spacing:.1em;font-size:13px}
+.logo,.eyebrow{font-family:var(--font-head)}
+.name{font-family:var(--font-head);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:14px}
+.name b{font-weight:600}
+/* 8) separadores de sección más grandes */
+.divider{padding:28px 0 14px}
+.divider span{font-family:var(--font-head);font-size:15px;font-weight:600;letter-spacing:.16em;padding:8px 22px;border-width:1.5px;border-color:var(--ink)}
+.divider em{font-size:13px}
+.subhead{font-family:var(--font-head);font-size:14px;font-weight:600;letter-spacing:.14em;padding:6px 16px;margin:14px 0 12px}
+/* 9) barra de progreso gruesa y rayada */
+.progress{height:14px;border-radius:8px;background:var(--border2)}
+.progress i{border-radius:8px;background:repeating-linear-gradient(-45deg,var(--ink) 0 7px,var(--stripe) 7px 14px)}
+.progress-label{font-size:12px}
+/* 10) buscador */
+#q::placeholder{font-size:13px}
+/* 6) nombres completos */
+.card-name{display:block;-webkit-line-clamp:unset;overflow:visible;overflow-wrap:anywhere;font-size:13.5px;line-height:1.35}
+.grid{align-items:start}
+/* 4) banderas */
+.country img{display:block;width:20px;height:15px;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.2);object-fit:cover}
+[data-theme="dark"] .country img{box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.chip-flag .country img{width:18px;height:13.5px}
+/* 5) íconos de estado sólidos */
+.qs{width:32px;height:32px;top:8px;right:8px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.qs svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.qs.st-have{background:var(--have-solid)}.qs.st-way{background:var(--way-solid)}.qs.st-miss{background:var(--miss-solid)}.qs.st-skip{background:var(--skip-solid)}
+/* 1) estado "No me interesa" */
+.st-skip{background:var(--skip-bg);color:var(--skip-fg)}
+.dot.st-skip{background:var(--skip-solid)}
+.stat.on.skip{background:var(--skip-bg);border-color:var(--skip-fg)}.stat.on.skip .n,.stat.on.skip .l{color:var(--skip-fg)}
+.opt.on.st-skip{border-color:var(--skip-fg)}
+/* 2) formulario con varias ediciones */
+.edblock{border:1px solid var(--border);border-radius:12px;padding:14px 14px 4px;margin:6px 0 14px;background:var(--surface)}
+.edhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-family:var(--font-head);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.linkbtn{background:none;border:none;color:var(--miss-fg);font-size:12px;font-weight:700;padding:2px 0}
+.addbtn{width:100%;margin-bottom:8px;border-style:dashed;color:var(--ink)}
