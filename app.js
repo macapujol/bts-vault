@@ -112,14 +112,14 @@ function serialize(d) {
 /* ═════════ Estado ═════════ */
 const S = {
   items: [], deleted: {}, rev: 0,
-  member: "all", era: "all", view: "grid", sortAsc: false, filtersOpen: false,
+  member: "all", era: "all", collapsed: new Set(), view: "grid", sortAsc: false, filtersOpen: false,
   filters: { search: "", categoria: [], formato: [], origen: [], estado: "", deseos: false },
   modal: null, cfg: null, status: { state: "off", msg: "" },
 };
 const Sync = { busy: false, again: false, timer: null, last: 0 };
 const byId = id => S.items.find(i => i.id === id);
 const persistLocal = () => ls.set(LS.cache, { items: S.items, deleted: S.deleted });
-const saveUI = () => ls.set(LS.ui, { view: S.view, sortAsc: S.sortAsc, member: S.member, era: S.era });
+const saveUI = () => ls.set(LS.ui, { view: S.view, sortAsc: S.sortAsc, member: S.member, era: S.era, collapsed: [...S.collapsed] });
 function touch() { S.rev++; persistLocal(); scheduleSync(); }
 
 /* ═════════ Eras ═════════ */
@@ -244,7 +244,8 @@ function groupHTML(g) {
   const body = g.subs
     ? g.subs.map(s => (S.member === "all" ? `<div class="subhead">${esc(s.label)}</div>` : "") + wrap(s.items.map(one).join(""))).join("")
     : wrap(g.items.map(one).join(""));
-  return `<section><div class="divider"><i></i><span>${esc(g.label)}<em>${count}</em></span><i></i></div>${body}</section>`;
+  const col = S.collapsed.has(g.label);
+  return `<section class="${col ? "collapsed" : ""}"><div class="divider" data-act="togglesec" data-val="${esc(g.label)}" role="button" aria-expanded="${!col}"><i></i><span><b class="chev">${col ? "▸" : "▾"}</b>${esc(g.label)}<em>${count}</em></span><i></i></div>${col ? "" : body}</section>`;
 }
 function renderList() {
   const host = $("#list"), items = visibleItems();
@@ -734,6 +735,9 @@ function onAction(act, el, e) {
     case "setstate": closePop(); return patchItem(id, { estado: val });
     case "togglewish": closePop(); return patchItem(id, { deseos: !(byId(id) || {}).deseos });
     case "member": S.member = val; S.era = "all"; saveUI(); renderAll(); centerActiveMember(true); return $("#enav").scrollTo ? $("#enav").scrollTo({ left: 0 }) : undefined;
+    case "togglesec":
+      if (S.collapsed.has(val)) S.collapsed.delete(val); else S.collapsed.add(val);
+      saveUI(); return renderList();
     case "totop": window.scrollTo ? window.scrollTo({ top: 0, behavior: "smooth" }) : null; return;
     case "navscroll": {
       const nav = document.getElementById(el.dataset.for), dx = Number(el.dataset.dir) * nav.clientWidth * 0.7;
@@ -830,7 +834,7 @@ function boot() {
   if (cache) { const d = normData(cache); S.items = d.items; S.deleted = d.deleted; }
   const ui = ls.get(LS.ui, {}) || {};
   S.view = ui.view === "list" ? "list" : "grid"; S.sortAsc = !!ui.sortAsc;
-  S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all"; S.era = typeof ui.era === "string" ? ui.era : "all";
+  S.member = MEMBERS.some(m => m.key === ui.member) ? ui.member : "all"; S.era = typeof ui.era === "string" ? ui.era : "all"; S.collapsed = new Set(Array.isArray(ui.collapsed) ? ui.collapsed : []);
   buildMnav(); syncThemeIcon(); bindEvents(); renderAll(); centerActiveMember(false); centerActiveMember(false, "#enav"); updateArrows();
   document.body.classList.toggle("viewer", viewer());
   setStatus(cfgOk() ? "idle" : "view");

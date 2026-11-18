@@ -362,3 +362,18 @@ body,input,select,textarea,button{font-family:var(--font-body)}
 .progress i{background:repeating-linear-gradient(-45deg,var(--bar-a) 0 8px,var(--bar-b) 8px 16px)}
 :root{--bar-a:#4a4a4a;--bar-b:#585858}
 [data-theme="dark"]{--bar-a:#d2d2d2;--bar-b:#c0c0c0}
+
+/* Texto bajo las fotos un poco más grande */
+.card-name{font-size:15px}
+.ed{font-size:13px}
+.artist{font-size:13px}
+.price{font-size:15.5px}
+.card-meta{font-size:12px;gap:7px}
+.fmt{font-size:11px;padding:2px 7px}
+.card .badge{font-size:11.5px;padding:4px 11px}
+.country img{width:21px;height:16px}
+/* Secciones plegables */
+.divider{cursor:pointer;-webkit-user-select:none;user-select:none}
+.divider:hover span{background:var(--accent-bg)}
+.divider .chev{display:inline-block;width:1.1em;margin-right:6px;font-weight:400;opacity:.7}
+section.collapsed .divider{padding-bottom:14px}
