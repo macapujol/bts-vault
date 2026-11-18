@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>BTS Merch Vault</title>
-<meta name="theme-color" content="#6d4fc2">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -22,6 +22,7 @@
     var t=localStorage.getItem("vault:theme");
     if(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)t="dark";
     document.documentElement.setAttribute("data-theme",t||"light");
+    var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=(t==="dark")?"#111111":"#ffffff";
   }catch(e){}
 </script>
 </head>

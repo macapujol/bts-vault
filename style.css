@@ -357,3 +357,8 @@ body,input,select,textarea,button{font-family:var(--font-body)}
 .edhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-family:var(--font-head);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
 .linkbtn{background:none;border:none;color:var(--miss-fg);font-size:12px;font-weight:700;padding:2px 0}
 .addbtn{width:100%;margin-bottom:8px;border-style:dashed;color:var(--ink)}
+
+/* Barra de progreso: rayas suaves (poco contraste) */
+.progress i{background:repeating-linear-gradient(-45deg,var(--bar-a) 0 8px,var(--bar-b) 8px 16px)}
+:root{--bar-a:#4a4a4a;--bar-b:#585858}
+[data-theme="dark"]{--bar-a:#d2d2d2;--bar-b:#c0c0c0}

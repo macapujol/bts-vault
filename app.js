@@ -11,7 +11,7 @@ const MEMBERS = [
   { key: "JIN", label: "Jin" }, { key: "AGUST D", label: "Suga" }, { key: "J-HOPE", label: "J-Hope" },
   { key: "Jimin", label: "Jimin" }, { key: "V", label: "V" }, { key: "Jungkook", label: "Jungkook" },
 ];
-const CATS = ["Album", "Single", "LIVE SHOW", "MUSTER", "Video/Documental", "Media", "VARIETY SHOW", "MEMORIES", "SEASON'S GREETINGS", "SEASON PACKAGE"];
+const CATS = ["Album", "Single", "LIVE SHOW", "MUSTER", "Video/Documental", "Media", "VARIETY SHOW", "MEMORIES", "SEASON'S GREETINGS", "SEASON PACKAGE", "Externo"];
 const FMTS = ["CD", "BLU-RAY", "DVD", "Vinyl", "Cassette", "Digital Code", "NFC", "Photobook", "CD+DVD", "CD+BLU-RAY", "Set Book/DVD", "Otros"];
 const ORIGS = ["Corea", "Japón", "US/Global", "Otro"];
 const FLAGS = {
@@ -467,6 +467,7 @@ function deleteItem(id) {
 
 /* ═════════ Tema, avisos y estado de sincronización ═════════ */
 function syncThemeIcon() {
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = document.documentElement.getAttribute("data-theme") === "dark" ? "#111111" : "#ffffff";
   $("#themebtn").textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "☀" : "☾";
 }
 function toggleTheme() {
